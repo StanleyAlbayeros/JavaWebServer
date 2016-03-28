@@ -12,7 +12,7 @@ public class WServer {
 	
 		try
 		{
-			serverSocket = new ServerSocket( 8200 );
+			serverSocket = new ServerSocket( 8206 );
 			
 			while (true)
 			{
