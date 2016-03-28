@@ -10,11 +10,12 @@ public class AsciiInputStream extends FilterInputStream {
 	protected AsciiInputStream (InputStream in)
 	{
 		super(in);
-	}
+	} 
+	
 	
 	public int read() throws IOException { 	
-
-		// metodo a heredar. tiramos la excepción con throws 
+		//
+		// metodo a heredar. tiramos la excepcion con throws 
 		// de la clase IOException que se encarga de notificar de problemas de i/o
 		
 		caracter= in.read();
