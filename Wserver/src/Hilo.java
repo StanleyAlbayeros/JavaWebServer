@@ -34,6 +34,7 @@ public class Hilo extends Thread {
 
 		InputStream is, is2;
 		OutputStream os, os2;
+		System.out.println("Estamos ejecutando desde un thread!");
 
 		try {
 
@@ -43,9 +44,18 @@ public class Hilo extends Thread {
 			br = bufferLectura.readLine();
 			System.out.println("Request recibida: " + br);
 
-			String filename = br.split("/")[1].split("\\?")[0];
+			String filename = br.split("/")[1].split(" HTTP")[0].split("\\?")[0];
 			
-			String opciones = br.split("\\?")[1].split(" HTTP")[0];
+			
+			
+			String opciones = "";
+			try {
+				opciones = br.split("\\?")[1].split(" HTTP")[0];
+			} catch (ArrayIndexOutOfBoundsException e) {
+				e.printStackTrace();
+			}
+			
+			System.out.println("\n\n heeeeeeeeeey \n\n");		
 			
 			Boolean ASC = false;
 			Boolean ZIP = false;
@@ -58,6 +68,7 @@ public class Hilo extends Thread {
 			//parsear opciones
 			
 			try {
+					
 					Pattern patronASC = Pattern.compile("asc=([^&]+)");
 					Pattern patronZIP = Pattern.compile("zip=([^&]+)");
 					Pattern patronGZIP = Pattern.compile("gzip=([^&]+)");
@@ -95,13 +106,36 @@ public class Hilo extends Thread {
 			//parsear opciones
 			//parsear opciones
 			//parsear opciones
-			String consoleLogASC = "Sirviendo " + filename + " con opción ASC";
+			String sirviendo = "Sirviendo " + filename;
+			String consoleLogASC = sirviendo  + " con opción ASC";
+			String consoleLogZIP = sirviendo  + " con opción ZIP";
+			String consoleLogGZIP = sirviendo  + " con opción GZIP";
+			String consoleLogPNG = sirviendo  + " con opción PNG";
 			
+			String ok = "servido!";
+			
+			String okASC = ok + "ASC";
+			String okZIP = ok + "ZIP";
+			String okGZIP = ok + "GZIP";
+			String okPNG = ok + "PNG";
+
+
+			//Cabeceras
+			//Cabeceras
+			//Cabeceras
+			//Cabeceras
+			//Cabeceras
 			
 			String cabeceraZip = cabeceraOK + "Content-Type: application/zip\n"
-					+ "Content-Disposition: filename=\"" +filename+ ".zip\"n\n";
+					+ "Content-Disposition: filename=\"" +filename+ ".zip\"\n";
 			
 			String cabeceraHTML = cabeceraOK + "Content-Type: text/html\n" + "\n";
+			
+			//Cabeceras
+			//Cabeceras
+			//Cabeceras
+			//Cabeceras
+			//Cabeceras
 			
 			
 			
@@ -113,10 +147,29 @@ public class Hilo extends Thread {
 				System.out.println("Nos han pedido el archivo con filename: " + filename);
 				try {
 					
+					
+					
+					if (ZIP){
+						
+						System.out.println(consoleLogZIP);
+						
+						is2 = new FileInputStream(filename);
+						os2 = clientSocket.getOutputStream();
+						
+						BufferedOutputStream bos = new BufferedOutputStream(os2);											
+						ZipOutputStream zos = new ZipOutputStream(bos);//
+						os2.write(cabeceraZip.getBytes());//
+						zos.putNextEntry(new ZipEntry(filename));
+						zos.flush();
+						zos.closeEntry();
+						//zos.close();
+						
+						System.out.println(okZIP);
+					}
+					
+					
 					if (ASC){
 						
-						System.out.println("Opcion ASC activa, sirviendo archivo en texto! " + filename);
-
 						System.out.println(consoleLogASC);
 						is2 = new FileInputStream(filename);					
 						is = new AsciiInputStream(is2);
@@ -124,14 +177,16 @@ public class Hilo extends Thread {
 						while ((caracter = is.read()) != -1) {
 							os.write(caracter);
 						}
-					}
+						System.out.println(okASC);
+					} else {
 						
-//					os2 = clientSocket.getOutputStream();					
-//					os.write(cabeceraZip.getBytes());//					
-//					os = new ZipOutputStream(os2);//
-//					ZipEntry zipEntry = new ZipEntry(filename);
-//					((ZipOutputStream) os).putNextEntry(zipEntry);
-					
+						System.out.println("Sirviendo " + filename + " tal cual");
+						is2 = new FileInputStream(filename);
+						os.write(cabeceraHTML.getBytes());
+						while ((caracter = is2.read()) != -1) {
+							os.write(caracter);
+						}
+					}
 
 				}catch (FileNotFoundException excep) {
 					os.write(respuestaError.getBytes());
@@ -147,6 +202,6 @@ public class Hilo extends Thread {
 			excep.printStackTrace();
 		}
 
-		System.out.println("Estamos ejecutando desde un thread!");
+		System.out.println("\nDONE\n");
 	}
 }
