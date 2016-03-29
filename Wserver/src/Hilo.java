@@ -16,6 +16,8 @@ public class Hilo extends Thread {
 	String respuestaError = "HTTP/1.1 404 Not Found\n\n" + "<!DOCTYPE><HTML><HEAD>PAGINA NO ENCONTRADA</HEAD></HTML>";
 	
 	String cabeceraOK = "HTTP/1.1 200 OK\n";
+	
+	static int BUFFER = 1024;
 
 	
 	
@@ -39,9 +41,12 @@ public class Hilo extends Thread {
 		try {
 
 			os = clientSocket.getOutputStream();
+			os2 = clientSocket.getOutputStream();
 			is = clientSocket.getInputStream();
 			BufferedReader bufferLectura = new BufferedReader(new InputStreamReader(is));
 			br = bufferLectura.readLine();
+			BufferedOutputStream bos = new BufferedOutputStream(os2);
+			ZipOutputStream zos = new ZipOutputStream(bos);
 			System.out.println("Request recibida: " + br);
 
 			String filename = br.split("/")[1].split(" HTTP")[0].split("\\?")[0];
@@ -127,7 +132,7 @@ public class Hilo extends Thread {
 			//Cabeceras
 			
 			String cabeceraZip = cabeceraOK + "Content-Type: application/zip\n"
-					+ "Content-Disposition: filename=\"" +filename+ ".zip\"\n";
+					+ "Content-Disposition: filename=\"" +filename+ ".zip\"\n\n";
 			
 			String cabeceraHTML = cabeceraOK + "Content-Type: text/html\n" + "\n";
 			
@@ -148,26 +153,6 @@ public class Hilo extends Thread {
 				try {
 					
 					
-					
-					if (ZIP){
-						
-						System.out.println(consoleLogZIP);
-						
-						is2 = new FileInputStream(filename);
-						os2 = clientSocket.getOutputStream();
-						
-						BufferedOutputStream bos = new BufferedOutputStream(os2);											
-						ZipOutputStream zos = new ZipOutputStream(bos);//
-						os2.write(cabeceraZip.getBytes());//
-						zos.putNextEntry(new ZipEntry(filename));
-						zos.flush();
-						zos.closeEntry();
-						//zos.close();
-						
-						System.out.println(okZIP);
-					}
-					
-					
 					if (ASC){
 						
 						System.out.println(consoleLogASC);
@@ -178,25 +163,62 @@ public class Hilo extends Thread {
 							os.write(caracter);
 						}
 						System.out.println(okASC);
-					} else {
+						//os.flush();
+					} 
+					
+					if (ZIP){
+						
+						System.out.println(consoleLogZIP);
+						/////////////////
+						is2 = new FileInputStream(filename);
+						//os2 = clientSocket.getOutputStream();
+						
+						
+						System.out.print(filename);
+						
+						
+						os2.write(cabeceraZip.getBytes());
+						zos.putNextEntry(new ZipEntry(filename));
+						byte buffer[] = new byte[BUFFER];
+						int length;
+						while ((length = is2.read(buffer)) >0){
+							zos.write(buffer,  0,  length);
+						}
+						
+						zos.flush();
+//						zos.closeEntry();
+
+//						zos.finish();
+//						zos.close();
+						
+						
+						
+						System.out.println(okZIP);
+					}
+					
+					
+					if (!ASC) {
 						
 						System.out.println("Sirviendo " + filename + " tal cual");
 						is2 = new FileInputStream(filename);
-						os.write(cabeceraHTML.getBytes());
+						os2.write(cabeceraHTML.getBytes());
 						while ((caracter = is2.read()) != -1) {
-							os.write(caracter);
+							os2.write(caracter);
 						}
 					}
+					
+
 
 				}catch (FileNotFoundException excep) {
 					os.write(respuestaError.getBytes());
 					excep.printStackTrace();
 				}
 			}
+			
 			is.close();
-			os.close();
-
-			clientSocket.close();
+			zos.closeEntry();
+			zos.close();
+//			clientSocket.close();
 
 		} catch (IOException excep) {
 			excep.printStackTrace();
