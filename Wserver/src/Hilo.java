@@ -34,7 +34,7 @@ public class Hilo extends Thread {
 
 	public void run() {
 
-		InputStream is, is2;
+		InputStream is, is2, is3;;
 		OutputStream os, os2;
 		System.out.println("Estamos ejecutando desde un thread!");
 
@@ -156,12 +156,17 @@ public class Hilo extends Thread {
 					if (ASC){
 						
 						System.out.println(consoleLogASC);
-						is2 = new FileInputStream(filename);					
-						is = new AsciiInputStream(is2);
+						is3 = new FileInputStream(filename);					
+						is = new AsciiInputStream(is3);
 						os.write(cabeceraHTML.getBytes());
 						while ((caracter = is.read()) != -1) {
 							os.write(caracter);
 						}
+						
+						os.write("\r\n".getBytes());
+						//os.write(System.getProperty("line.separator").getBytes());
+
+
 						System.out.println(okASC);
 						//os.flush();
 					} 
@@ -184,9 +189,9 @@ public class Hilo extends Thread {
 						while ((length = is2.read(buffer)) >0){
 							zos.write(buffer,  0,  length);
 						}
-						
-						zos.flush();
-//						zos.closeEntry();
+						os.write("\n\n".getBytes());
+//						zos.flush();
+						zos.closeEntry();
 
 //						zos.finish();
 //						zos.close();
@@ -200,9 +205,9 @@ public class Hilo extends Thread {
 					if (!ASC) {
 						
 						System.out.println("Sirviendo " + filename + " tal cual");
-						is2 = new FileInputStream(filename);
+						is3 = new FileInputStream(filename);
 						os2.write(cabeceraHTML.getBytes());
-						while ((caracter = is2.read()) != -1) {
+						while ((caracter = is3.read()) != -1) {
 							os2.write(caracter);
 						}
 					}
@@ -216,8 +221,8 @@ public class Hilo extends Thread {
 			}
 			
 			is.close();
-			zos.closeEntry();
-			zos.close();
+//			zos.closeEntry();
+//			zos.close();
 //			clientSocket.close();
 
 		} catch (IOException excep) {
