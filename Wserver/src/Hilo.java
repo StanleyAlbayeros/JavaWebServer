@@ -17,7 +17,7 @@ public class Hilo extends Thread {
 
 	String cabeceraOK = "HTTP/1.1 200 OK\n";
 
-	static int BUFFER = 1024;
+	static int BUFFER = 2048;
 
 	String cabeceraPNG = cabeceraOK + "Content-Type: image/png\n";
 
@@ -32,7 +32,6 @@ public class Hilo extends Thread {
 	public void run() {
 
 		InputStream is, is2, is3;
-		;
 		OutputStream os, os2;
 		System.out.println("Estamos ejecutando desde un thread!");
 
@@ -43,9 +42,8 @@ public class Hilo extends Thread {
 			is = clientSocket.getInputStream();
 			BufferedReader bufferLectura = new BufferedReader(new InputStreamReader(is));
 			br = bufferLectura.readLine();
-			BufferedOutputStream bos = new BufferedOutputStream(os2);
-			ZipOutputStream zos = new ZipOutputStream(bos);
-			System.out.println("Request recibida: " + br);
+			
+			System.out.println("\nRequest recibida: " + br);
 
 			String filename = br.split("/")[1].split(" HTTP")[0].split("\\?")[0];
 
@@ -169,22 +167,26 @@ public class Hilo extends Thread {
 						System.out.println(consoleLogZIP);
 						/////////////////
 						is2 = new FileInputStream(filename);
-						// os2 = clientSocket.getOutputStream();
+						os2 = clientSocket.getOutputStream();
+						os2.write(cabeceraZip.getBytes());
+						BufferedOutputStream bos = new BufferedOutputStream(os2);
+						ZipOutputStream zos = new ZipOutputStream(bos);
 
 						System.out.print(filename);
 
-						os2.write(cabeceraZip.getBytes());
+						
 						zos.putNextEntry(new ZipEntry(filename));
 						byte buffer[] = new byte[BUFFER];
 						int length;
 						while ((length = is2.read(buffer)) > 0) {
 							zos.write(buffer, 0, length);
 						}
-						os2.write("\n\n".getBytes(), 0, "\n\n".getBytes().length);
-						// zos.flush();
-						// zos.closeEntry();
+						os2.write("\n\n".getBytes());
+//						zos.flush();
+						zos.closeEntry();
 
-						// zos.finish();
+//						 zos.finish();
+						 os2.flush();
 						// zos.close();
 
 						System.out.println(okZIP);
@@ -194,10 +196,13 @@ public class Hilo extends Thread {
 
 						System.out.println("Sirviendo " + filename + " tal cual");
 						is3 = new FileInputStream(filename);
-						os2.write(cabeceraHTML.getBytes());
+						os.write(cabeceraHTML.getBytes());
 						while ((caracter = is3.read()) != -1) {
-							os2.write(caracter);
+							os.write(caracter);
 						}
+						os.write("\n\n".getBytes());
+						os.flush();
+
 					}
 
 				} catch (FileNotFoundException excep) {
@@ -207,8 +212,8 @@ public class Hilo extends Thread {
 			}
 
 			is.close();
-			zos.closeEntry();
-			zos.close();
+//			zos.closeEntry();
+//			zos.close();
 			// clientSocket.close();
 
 		} catch (IOException excep) {
