@@ -52,7 +52,7 @@ public class Hilo extends Thread {
 				e.printStackTrace();
 			}
 
-			System.out.println("\n\n antes del parseo de URL \n\n");
+			System.out.println("\n\n heeeeeeeeeey \n\n");
 
 			Boolean ASC = false;
 			Boolean ZIP = false;
@@ -180,6 +180,7 @@ public class Hilo extends Thread {
 			if ((bufferRequest.indexOf("GET") != -1)) {
 				System.out.println("Nos han pedido el archivo con filename: " + filename);
 				try {
+<<<<<<< HEAD
 					
 					if (HTML){
 						cabeceraFinal = cabeceraHTML;
@@ -187,6 +188,24 @@ public class Hilo extends Thread {
 						if (ASC){
 							is = new AsciiInputStream(is);
 						}						
+=======
+
+					if (ASC) {
+
+						System.out.println(consoleLogASC);
+						is3 = new FileInputStream(filename);
+						is = new AsciiInputStream(is3);
+						os.write(cabeceraHTML.getBytes());
+						while ((caracter = is.read()) != -1) {
+							os.write(caracter);
+						}
+
+						os.write("\n\n".getBytes(), 0, "\n\n".getBytes().length);
+						// os.write(System.getProperty("line.separator").getBytes());
+
+						System.out.println(okASC);
+						// os.flush();
+>>>>>>> parent of 438a6c3... pre-rework
 					}
 					
 					if (PNG){
@@ -195,10 +214,28 @@ public class Hilo extends Thread {
 					
 					if (ZIP){
 						
+<<<<<<< HEAD
 						cabeceraFinal = cabeceraZIP;
 						os = new ZipOutputStream(os);
 						zip = new ZipEntry(filename);
 						((ZipOutputStream) os ).putNextEntry(zip);
+=======
+						zos.putNextEntry(new ZipEntry(filename));
+						byte buffer[] = new byte[BUFFER];
+						int length;
+						while ((length = is2.read(buffer)) > 0) {
+							zos.write(buffer, 0, length);
+						}
+						os2.write("\n\n".getBytes());
+//						zos.flush();
+						zos.closeEntry();
+
+//						 zos.finish();
+						 os2.flush();
+						// zos.close();
+
+						System.out.println(okZIP);
+>>>>>>> parent of 438a6c3... pre-rework
 					}
 					
 					if (GZIP){
@@ -231,12 +268,15 @@ public class Hilo extends Thread {
 					excep.printStackTrace();
 				}
 			}
+<<<<<<< HEAD
 			
 			
 			/*
 			os.close();
+=======
+
+>>>>>>> parent of 438a6c3... pre-rework
 			is.close();
-			clientSocket.close();
 //			zos.closeEntry();
 //			zos.close();
 			// clientSocket.close();
