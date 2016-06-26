@@ -214,9 +214,12 @@ public class Hilo extends Thread {
 					int carac;
 					while ((carac= is.read()) !=-1)
 			    	{
-			    		os.write(carac);
+						if (carac != -2){
+							os.write(carac);
+						}
 			    	}
 					
+					os.flush();
 					/*
 					while ((carac = is.read())!=-1){
 						if (carac!=-2){
