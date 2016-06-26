@@ -4,9 +4,7 @@ import java.io.InputStream;
 
 public class AsciiInputStream extends FilterInputStream {
 
-	
-	
-//	private boolean paso = false;
+	private boolean paso = false;
 
 	protected AsciiInputStream(InputStream in) {
 		super(in);
@@ -18,26 +16,14 @@ public class AsciiInputStream extends FilterInputStream {
 		// de la clase IOException que se encarga de notificar de problemas de
 		// i/o
 		
-///
-		int caracter = super.read();
-		int control = -10;
+		int caracter;
 		
-/*
-		while ( ( caracter = this.in.read() ) == '<'){
-			
-			while ( ( caracter = this.in.read() ) != '>'){
-			};
-			
-		}
-		return caracter;
-
-///
-/*
 		caracter = in.read();
 
 		if (caracter == '<') {
 			paso = true;
 		}
+		
 		if (!paso) {
 			return caracter;
 		} else {
@@ -47,8 +33,6 @@ public class AsciiInputStream extends FilterInputStream {
 			paso = false;
 			return read();
 		}
-		
-*/
 	}
 
 }
