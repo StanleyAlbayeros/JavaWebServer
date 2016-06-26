@@ -54,7 +54,7 @@ public class Hilo extends Thread {
 				e.printStackTrace();
 			}
 
-			System.out.println("\n\n heeeeeeeeeey \n\n");
+			System.out.println("\n\n antes del parseo de URL \n\n");
 
 			Boolean ASC = false;
 			Boolean ZIP = false;
@@ -152,9 +152,12 @@ public class Hilo extends Thread {
 						is = new AsciiInputStream(is3);
 						os.write(cabeceraHTML.getBytes());
 						while ((caracter = is.read()) != -1) {
-							os.write(caracter);
+							if (caracter == ";".toCharArray()[0]){
+								os.write("\n".getBytes(), 0 , "\n".getBytes().length);
+							} else {
+								os.write(caracter);
+							}
 						}
-
 						os.write("\n\n".getBytes(), 0, "\n\n".getBytes().length);
 						// os.write(System.getProperty("line.separator").getBytes());
 
@@ -189,7 +192,7 @@ public class Hilo extends Thread {
 						 os2.flush();
 						// zos.close();
 
-						System.out.println(okZIP);
+						System.out.println("okZIP");
 					}
 
 					if (!ASC) {
@@ -210,8 +213,10 @@ public class Hilo extends Thread {
 					excep.printStackTrace();
 				}
 			}
-
+			
+			os.close();
 			is.close();
+			clientSocket.close();
 //			zos.closeEntry();
 //			zos.close();
 			// clientSocket.close();
