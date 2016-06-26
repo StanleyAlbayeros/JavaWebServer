@@ -6,7 +6,7 @@ public class AsciiInputStream extends FilterInputStream {
 
 	
 	
-//	private boolean paso = false;
+	private boolean paso = false;
 
 	protected AsciiInputStream(InputStream in) {
 		super(in);
@@ -19,7 +19,8 @@ public class AsciiInputStream extends FilterInputStream {
 		// i/o
 		
 ///
-		int caracter;
+		
+/*
 		while ( ( caracter = this.in.read() ) == '<'){
 			
 			while ( ( caracter = this.in.read() ) != '>'){
@@ -27,9 +28,11 @@ public class AsciiInputStream extends FilterInputStream {
 			
 		}
 		return caracter;
+*/
 ///
-/*
-		caracter = in.read();
+		
+
+		int caracter = in.read();
 
 		if (caracter == '<') {
 			paso = true;
@@ -44,7 +47,7 @@ public class AsciiInputStream extends FilterInputStream {
 			return read();
 		}
 		
-*/
+
 	}
 
 }

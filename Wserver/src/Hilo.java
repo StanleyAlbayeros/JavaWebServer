@@ -7,18 +7,19 @@ public class Hilo extends Thread {
 
 	ServerSocket serverSocket;
 	Socket clientSocket;
+	InputStream is;
+	OutputStream os, os2;
+	ZipEntry zip;
 	
-
-	FileInputStream is;
-
-	String br = null, filename;
-	String indexhtml = "index.html";
+	String bufferRequest = null, filename;
 
 	static int BUFFER = 2048;
 
 	int caracter;
 
 	public BufferedReader bufferLectura;
+	
+
 
 	public Hilo(Socket client) throws IOException {
 		this.clientSocket = client;
@@ -26,8 +27,7 @@ public class Hilo extends Thread {
 
 	public void run() {
 
-		InputStream is, is2, is3;
-		OutputStream os, os2;
+
 		System.out.println("Estamos ejecutando desde un thread!");
 
 		try {
@@ -35,16 +35,19 @@ public class Hilo extends Thread {
 			os = clientSocket.getOutputStream();
 			os2 = clientSocket.getOutputStream();
 			is = clientSocket.getInputStream();
-			BufferedReader bufferLectura = new BufferedReader(new InputStreamReader(is));
-			br = bufferLectura.readLine();
-			
-			System.out.println("\nRequest recibida: " + br);
+			bufferLectura = new BufferedReader(new InputStreamReader(is));
+			bufferRequest = bufferLectura.readLine();
 
-			String filename = br.split("/")[1].split(" HTTP")[0].split("\\?")[0];
+			
+			System.out.println("\nRequest recibida: " + bufferRequest);
+
+			String filename = bufferRequest.split("/")[1].split(" HTTP")[0].split("\\?")[0];
+			
+			is = new FileInputStream(filename);
 
 			String opciones = "";
 			try {
-				opciones = br.split("\\?")[1].split(" HTTP")[0];
+				opciones = bufferRequest.split("\\?")[1].split(" HTTP")[0];
 			} catch (ArrayIndexOutOfBoundsException e) {
 				e.printStackTrace();
 			}
@@ -150,10 +153,10 @@ public class Hilo extends Thread {
 			String cabeceraPNG = cabeceraOK + "Content-Type: image/png\n" + "Content-Disposition: filename=\""
 					+ filename + ".png\"\n\n";
 
-			String cabeceraZip = cabeceraOK + "Content-Type: application/zip\n" + "Content-Disposition: filename=\""
+			String cabeceraZIP = cabeceraOK + "Content-Type: application/zip\n" + "Content-Disposition: filename=\""
 					+ filename + ".zip\"\n\n";
 
-			String cabeceraGZip = cabeceraOK + "Content-Type: application/gzip\n" + "Content-Disposition: filename=\""
+			String cabeceraGZIP = cabeceraOK + "Content-Type: application/gzip\n" + "Content-Disposition: filename=\""
 					+ filename + ".gz\"\n\n";
 			
 			String cabeceraHTML = cabeceraOK + "Content-Type: text/html\n"  + "Content-Disposition: filename=\""
@@ -161,6 +164,8 @@ public class Hilo extends Thread {
 			
 			String respuestaError = "HTTP/1.1 404 Not Found\n\n" + "<!DOCTYPE><HTML><HEAD>Recurso: "
 					+ filename + " no encontrado</HEAD></HTML>"; 
+			
+			String cabeceraFinal = "";
 
 			// Cabeceras
 			// Cabeceras
@@ -170,92 +175,83 @@ public class Hilo extends Thread {
 
 			// filename= "index.html";
 
-			System.out.println("Index of get: " + br.indexOf("GET"));
+			System.out.println("Index of get: " + bufferRequest.indexOf("GET"));
 
-			if ((br.indexOf("GET") != -1)) {
+			if ((bufferRequest.indexOf("GET") != -1)) {
 				System.out.println("Nos han pedido el archivo con filename: " + filename);
 				try {
-
-					if (ASC) {
-
-						System.out.println(consoleLogASC);
-						is3 = new FileInputStream(filename);
-						is = new AsciiInputStream(is3);
-						os.write(cabeceraHTML.getBytes());
-						while ((caracter = is.read()) != -1) {
-							if (caracter == ";".toCharArray()[0]){
-								os.write("\n".getBytes(), 0 , "\n".getBytes().length);
-							} else {
-								os.write(caracter);
-							}
-						}
-						os.write("\n\n".getBytes(), 0, "\n\n".getBytes().length);
-						// os.write(System.getProperty("line.separator").getBytes());
-
-						System.out.println(okASC);
-						// os.flush();
-					}
-
-					if (ZIP) {
-
-						System.out.println(consoleLogZIP);
-						/////////////////
-						is2 = new FileInputStream(filename);
-						os2 = clientSocket.getOutputStream();
-						os2.write(cabeceraZip.getBytes());
-						BufferedOutputStream bos = new BufferedOutputStream(os2);
-						ZipOutputStream zos = new ZipOutputStream(bos);
-
-						System.out.print(filename);
-
+					
+					if (HTML){
+						cabeceraFinal = cabeceraHTML;
 						
-						zos.putNextEntry(new ZipEntry(filename));
-						byte buffer[] = new byte[BUFFER];
-						int length;
-						while ((length = is2.read(buffer)) > 0) {
-							zos.write(buffer, 0, length);
-						}
-						os2.write("\n\n".getBytes());
-//						zos.flush();
-						zos.closeEntry();
-
-//						 zos.finish();
-						 os2.flush();
-						// zos.close();
-
-						System.out.println("okZIP");
+						if (ASC){
+							is = new AsciiInputStream(is);
+						}						
 					}
-
-					if (!ASC) {
-
-						System.out.println("Sirviendo " + filename + " tal cual");
-						is3 = new FileInputStream(filename);
-						os.write(cabeceraHTML.getBytes());
-						while ((caracter = is3.read()) != -1) {
-							os.write(caracter);
-						}
-						os.write("\n\n".getBytes());
-						os.flush();
-
+					
+					if (PNG){
+						cabeceraFinal = cabeceraPNG;
 					}
-
+					
+					if (ZIP){
+						
+						cabeceraFinal = cabeceraZIP;
+						os = new ZipOutputStream(os);
+						zip = new ZipEntry(filename);
+						((ZipOutputStream) os ).putNextEntry(zip);
+					}
+					
+					if (GZIP){
+						
+						cabeceraFinal = cabeceraGZIP;
+						os = new GZIPOutputStream(os);
+						
+					}
+					
+					os.write(cabeceraFinal.getBytes());
+					os.flush();
+					
+					int carac;
+					while ((carac= is.read()) !=-1)
+			    	{
+			    		os.write(carac);
+			    	}
+					
+					/*
+					while ((carac = is.read())!=-1){
+						if (carac!=-2){
+							os.write(carac);
+						}
+					}
+					*/
+						
+						
 				} catch (FileNotFoundException excep) {
 					os.write(respuestaError.getBytes());
 					excep.printStackTrace();
 				}
 			}
 			
+			
+			/*
 			os.close();
 			is.close();
 			clientSocket.close();
 //			zos.closeEntry();
 //			zos.close();
 			// clientSocket.close();
-
+			 */
+			
+			is.close();
+			os.close();
+			clientSocket.close();
+			
 		} catch (IOException excep) {
 			excep.printStackTrace();
 		}
+		
 
+		
 		System.out.println("\nDONE\n");
 	}
 }
