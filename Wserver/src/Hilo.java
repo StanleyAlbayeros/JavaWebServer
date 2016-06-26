@@ -67,9 +67,9 @@ public class Hilo extends Thread {
 
 			try {
 
-				Pattern patronASC = Pattern.compile("asc=([^&]+)");
-				Pattern patronZIP = Pattern.compile("zip=([^&]+)");
-				Pattern patronGZIP = Pattern.compile("gzip=([^&]+)");
+				Pattern patronASC = Pattern.compile("asc=true");
+				Pattern patronZIP = Pattern.compile("zip=true");
+				Pattern patronGZIP = Pattern.compile("gzip=true");
 				Pattern patronPNG = Pattern.compile(".png");
 				Pattern patronHTML = Pattern.compile(".html");
 				
@@ -80,17 +80,17 @@ public class Hilo extends Thread {
 				Matcher matcherHTML = patronHTML.matcher(filename);
 
 				if (matcherASC.find()) {
-					ASC = Boolean.valueOf(matcherASC.group(1));
+					ASC = Boolean.valueOf(matcherASC.group(0));
 					System.out.println("\nOpción ASC habilitada\n");
 
 				}
 				if (matcherZIP.find()) {
-					ZIP = Boolean.valueOf(matcherZIP.group(1));
+					ZIP = Boolean.valueOf(matcherZIP.group(0));
 					System.out.println("\nOpción ZIP habilitada\n");
 
 				}
 				if (matcherGZIP.find()) {
-					GZIP = Boolean.valueOf(matcherGZIP.group(1));
+					GZIP = Boolean.valueOf(matcherGZIP.group(0));
 					System.out.println("\nOpción GZIP habilitada\n");
 
 				}
@@ -160,7 +160,7 @@ public class Hilo extends Thread {
 					+ filename + ".gz\"\n\n";
 			
 			String cabeceraHTML = cabeceraOK + "Content-Type: text/html\n"  + "Content-Disposition: filename=\""
-					+ filename + ".html\"\n\n";
+					+ filename + "\"\n\n";
 			
 			String respuestaError = "HTTP/1.1 404 Not Found\n\n" + "<!DOCTYPE><HTML><HEAD>Recurso: "
 					+ filename + " no encontrado</HEAD></HTML>"; 
@@ -183,64 +183,60 @@ public class Hilo extends Thread {
 					
 					if (HTML){
 						cabeceraFinal = cabeceraHTML;
-						
+						System.out.println(consoleLogHTML);
+
 						if (ASC){
+							System.out.println(consoleLogASC);
 							is = new AsciiInputStream(is);
-						}						
+							System.out.println(okASC);
+
+						}					
+						
+						System.out.println(okHTML);
+
 					}
 					
 					if (PNG){
+						System.out.println(consoleLogPNG);
 						cabeceraFinal = cabeceraPNG;
+						System.out.println(okPNG);
+
 					}
 					
 					if (ZIP){
-						
+						System.out.println(consoleLogZIP);
 						cabeceraFinal = cabeceraZIP;
 						os = new ZipOutputStream(os);
 						zip = new ZipEntry(filename);
 						((ZipOutputStream) os ).putNextEntry(zip);
+						System.out.println(okZIP);
+
 					}
 					
 					if (GZIP){
-						
+						System.out.println(consoleLogGZIP);
 						cabeceraFinal = cabeceraGZIP;
 						os = new GZIPOutputStream(os);
+						System.out.println(okGZIP);
+
 						
 					}
-					
+					System.out.println("cabecera final: " + cabeceraFinal);
+
 					os.write(cabeceraFinal.getBytes());
 					os.flush();
 					
-					int carac;
-					while ((carac= is.read()) !=-1)
-			    	{
-			    		os.write(carac);
-			    	}
-					
-					/*
-					while ((carac = is.read())!=-1){
-						if (carac!=-2){
-							os.write(carac);
-						}
+					int caracter;
+					while ((caracter = is.read()) != -1) {
+						os.write(caracter);
 					}
-					*/
-						
+
 						
 				} catch (FileNotFoundException excep) {
 					os.write(respuestaError.getBytes());
 					excep.printStackTrace();
 				}
 			}
-			
-			
-			/*
-			os.close();
-			is.close();
-			clientSocket.close();
-//			zos.closeEntry();
-//			zos.close();
-			// clientSocket.close();
-			 */
 			
 			is.close();
 			os.close();
