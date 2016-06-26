@@ -154,10 +154,13 @@ public class Hilo extends Thread {
 					+ filename + ".png\"\n\n";
 
 			String cabeceraZIP = cabeceraOK + "Content-Type: application/zip\n" + "Content-Disposition: attachment; filename=\""
-					+ filename + ".zip\"\n\n";
+					+ filename + ".zip\"\nConnection: close\n\n";
 
 			String cabeceraGZIP = cabeceraOK + "Content-Type: application/gzip\n" + "Content-Disposition: attachment; filename=\""
-					+ filename + ".gzip\"\n\n";
+					+ filename + ".gz\"\n\n";
+			
+			String cabeceraZIPGZIP = cabeceraOK + "Content-Type: application/gzip\n" + "Content-Disposition: attachment; filename=\""
+					+ filename + ".zip.gz\"\n\n";
 			
 			String cabeceraHTML = cabeceraOK + "Content-Type: text/html\n"  + "Content-Disposition: filename=\""
 					+ filename + ".html\"\n\n";
@@ -183,6 +186,8 @@ public class Hilo extends Thread {
 					
 					if (HTML){
 						cabeceraFinal = cabeceraHTML;
+						os.write(cabeceraFinal.getBytes());
+						os.flush();
 						
 						if (ASC){
 							is = new AsciiInputStream(is);
@@ -192,23 +197,36 @@ public class Hilo extends Thread {
 					if (PNG){
 						cabeceraFinal = cabeceraPNG;
 					}
+					boolean controlZIPGZIP = false;
 					
 					if (ZIP){
-						
-						cabeceraFinal = cabeceraZIP;
-						os = new ZipOutputStream(os);
-						zip = new ZipEntry(filename);
-						((ZipOutputStream) os ).putNextEntry(zip);
+						if (!GZIP){
+							cabeceraFinal = cabeceraZIP;
+							os.write(cabeceraFinal.getBytes());
+							os = new ZipOutputStream(os);
+							zip = new ZipEntry(filename);
+							((ZipOutputStream) os ).putNextEntry(zip);
+							}
+							//os.flush();
+						if (GZIP){							
+							controlZIPGZIP = true;
+							cabeceraFinal = cabeceraZIPGZIP;
+							os.write(cabeceraFinal.getBytes());
+							os = new ZipOutputStream(os);
+							zip = new ZipEntry(filename);
+							((ZipOutputStream) os ).putNextEntry(zip);
+							os = new GZIPOutputStream(os);
+							}
 					}
 					
-					if (GZIP){
+					if (GZIP && !controlZIPGZIP){	
 						
 						cabeceraFinal = cabeceraGZIP;
+						os.write(cabeceraFinal.getBytes());
 						os = new GZIPOutputStream(os);
-						
 					}
 					
-					os.write(cabeceraFinal.getBytes());
+					//os.write(cabeceraFinal.getBytes());
 					os.flush();
 					
 					int carac;
@@ -219,41 +237,22 @@ public class Hilo extends Thread {
 						}
 			    	}
 					
-					os.flush();
-					/*
-					while ((carac = is.read())!=-1){
-						if (carac!=-2){
-							os.write(carac);
-						}
-					}
-					*/
-						
+					os.flush();						
 						
 				} catch (FileNotFoundException excep) {
 					os.write(respuestaError.getBytes());
 					excep.printStackTrace();
-				}
 			}
-			
-			
-			/*
-			os.close();
-			is.close();
-			clientSocket.close();
-//			zos.closeEntry();
-//			zos.close();
-			// clientSocket.close();
-			 */
-			
-			is.close();
-			os.close();
-			clientSocket.close();
-			
-		} catch (IOException excep) {
-			excep.printStackTrace();
 		}
-		
-
+			
+			
+		is.close();
+		os.close();
+		clientSocket.close();
+			
+	} catch (IOException excep) {
+		excep.printStackTrace();
+	}
 		
 		System.out.println("\nDONE\n");
 	}
