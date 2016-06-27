@@ -68,7 +68,7 @@ public class Hilo extends Thread {
 			try {
 
 				Pattern patronASC = Pattern.compile("asc=true");
-				Pattern patronZIP = Pattern.compile("zip=true");
+				Pattern patronZIP = Pattern.compile("[^g]zip=true");
 				Pattern patronGZIP = Pattern.compile("gzip=true");
 				Pattern patronPNG = Pattern.compile(".png");
 				Pattern patronHTML = Pattern.compile(".html");
@@ -84,7 +84,7 @@ public class Hilo extends Thread {
 					System.out.println("\nOpción ASC habilitada\n");
 
 				}
-				if (matcherZIP.find()) {
+				if (matcherZIP.find() ) {
 					ZIP = true;
 					System.out.println("\nOpción ZIP habilitada\n");
 
@@ -154,7 +154,7 @@ public class Hilo extends Thread {
 					+ filename + ".png\"\n\n";
 
 			String cabeceraZIP = cabeceraOK + "Content-Type: application/zip\n" + "Content-Disposition: attachment; filename=\""
-					+ filename + ".zip\"\nConnection: close\n\n";
+					+ filename + ".zip\"\n\n";
 
 			String cabeceraGZIP = cabeceraOK + "Content-Type: application/gzip\n" + "Content-Disposition: attachment; filename=\""
 					+ filename + ".gz\"\n\n";
@@ -186,9 +186,6 @@ public class Hilo extends Thread {
 					
 					if (HTML){
 						cabeceraFinal = cabeceraHTML;
-						os.write(cabeceraFinal.getBytes());
-						os.flush();
-						
 						if (ASC){
 							is = new AsciiInputStream(is);
 						}						
@@ -197,6 +194,7 @@ public class Hilo extends Thread {
 					if (PNG){
 						cabeceraFinal = cabeceraPNG;
 					}
+					
 					boolean controlZIPGZIP = false;
 					
 					if (ZIP){
@@ -237,6 +235,11 @@ public class Hilo extends Thread {
 						}
 			    	}
 					
+					/* ??? como cierro el zipoutputstream dentro del gzip?
+					if (GZIP || ZIP){
+						((ZipOutputStream) os).finish();
+					}
+					*/
 					os.flush();						
 						
 				} catch (FileNotFoundException excep) {
