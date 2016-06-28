@@ -9,7 +9,7 @@ public class WServer {
 		ServerSocket serverSocket;
 		Socket clientSocket;
 		Hilo thread;
-		int port = 8206;
+		int port = 8207;
 	
 		System.out.println("Server starting on port:" + port);
 		
